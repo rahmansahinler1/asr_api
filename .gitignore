@@ -82,4 +82,4 @@ venv/
 
 # Database
 db_local/
-*.ini%      
+*.ini
