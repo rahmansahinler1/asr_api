@@ -1,1 +1,1 @@
-# llmo_api
+# aisearchrefs.com - API implementation
