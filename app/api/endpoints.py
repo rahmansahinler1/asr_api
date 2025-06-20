@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
+
 from .core import Processor
+from ..db.database import Database
 
 router = APIRouter()
 processor = Processor()
@@ -12,6 +14,26 @@ async def health_check():
         content={"status": "healthy", "service": "LLM Analytics API"},
         status_code=200
     )
+
+@router.post("/get/init")
+async def init(request: Request):
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+
+        with Database() as db:
+            user_info, brand_info, overiew_data = db.get_init_data(user_id)
+
+        return JSONResponse(
+            content={
+                "user_info": user_info,
+                "brand_info": brand_info,
+                "overview_data": overiew_data
+            },
+            status_code=200,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/analyze")
 async def analyze_query(request: Request):
