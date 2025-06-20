@@ -83,3 +83,6 @@ venv/
 # Database
 db_local/
 *.ini
+
+# Cursor
+.cursor/
