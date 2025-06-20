@@ -58,6 +58,104 @@ class Database:
             self.conn.rollback()
             raise e
 
+    # 🆕 Individual data retrieval functions
+    def get_user_info(self, user_id):
+        """Get user information by user_id"""
+        try:
+            query = """
+                SELECT user_id, user_name, user_surname, user_email, user_type, user_created_at
+                FROM user_info 
+                WHERE user_id = %s
+            """
+            self.cursor.execute(query, (user_id,))
+            result = self.cursor.fetchone()
+            
+            if result:
+                return {
+                    "user_id": str(result[0]),
+                    "user_name": result[1],
+                    "user_surname": result[2], 
+                    "user_email": result[3],
+                    "user_type": result[4],
+                    "user_created_at": result[5].isoformat() if result[5] else None
+                }
+            return None
+            
+        except DatabaseError as e:
+            logger.error(f"Error fetching user info: {e}")
+            raise e
+
+    def get_brand_info(self, user_id):
+        """Get brand information for a user (single brand)"""
+        try:
+            query = """
+                SELECT brand_id, brand_name, domain, brand_niches, last_update
+                FROM brand_info 
+                WHERE user_id = %s
+                LIMIT 1
+            """
+            self.cursor.execute(query, (user_id,))
+            result = self.cursor.fetchone()
+            
+            if result:
+                return {
+                    "brand_id": str(result[0]),
+                    "brand_name": result[1],
+                    "domain": result[2],
+                    "brand_niches": result[3],
+                    "last_update": result[4].isoformat() if result[4] else None
+                }
+            return None
+            
+        except DatabaseError as e:
+            logger.error(f"Error fetching brand info: {e}")
+            raise e
+
+    def get_overview_data(self, user_id):
+        """Get overview/analytics data for a user"""
+        try:
+            query = """
+                SELECT o.overview_id, o.brand_id, o.created_at, o.ai_seo_score,
+                       b.brand_name
+                FROM overview_data o
+                JOIN brand_info b ON o.brand_id = b.brand_id
+                WHERE o.user_id = %s
+                ORDER BY o.created_at DESC
+            """
+            self.cursor.execute(query, (user_id,))
+            results = self.cursor.fetchall()
+            
+            overview_data = []
+            for result in results:
+                overview_data.append({
+                    "overview_id": str(result[0]),
+                    "brand_id": str(result[1]),
+                    "created_at": result[2].isoformat() if result[2] else None,
+                    "ai_seo_score": result[3],
+                    "brand_name": result[4]
+                })
+            
+            return overview_data
+            
+        except DatabaseError as e:
+            logger.error(f"Error fetching overview data: {e}")
+            raise e
+
+    # 🆕 Wrapper function for initialization endpoint
+    def get_init_data(self, user_id):
+        """Get all initialization data for a user (user_info, brand_info, overview_data)"""
+        try:
+            # Get all three data sets
+            user_info = self.get_user_info(user_id)
+            brand_info = self.get_brand_info(user_id) 
+            overview_data = self.get_overview_data(user_id)
+            
+            return user_info, brand_info, overview_data
+            
+        except DatabaseError as e:
+            logger.error(f"Error in get_init_data: {e}")
+            raise e
+
 if __name__ == "__main__":
     with Database() as db:
         db.reset_database()
