@@ -1,9 +1,11 @@
 from openai import OpenAI
 from datetime import datetime
+from dotenv import load_dotenv
 import os
 
 class RetrievalFunctions:
     def __init__(self):
+        load_dotenv()
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def search_web(self, query):
