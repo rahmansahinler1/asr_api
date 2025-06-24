@@ -46,6 +46,17 @@ class Database:
         except DatabaseError as e:
             self.conn.rollback()
             raise e
+    
+    def insert_test_users(self):
+        sql_path = Path(__file__).resolve().parent / "sql" / "insert_test_data.sql"
+        with sql_path.open("r") as file:
+            query = file.read()
+        try:
+            self.cursor.execute(query)
+            self.conn.commit()
+        except DatabaseError as e:
+            self.conn.rollback()
+            raise e
 
     def reset_database(self):
         sql_path = Path(__file__).resolve().parent / "sql" / "reset_database.sql"
@@ -112,7 +123,7 @@ class Database:
             raise e
 
     def get_overview_data(self, user_id):
-        """Get overview/analytics data for a user"""
+        """Get overview/analytics data for a user with previous score and change calculation"""
         try:
             query = """
                 SELECT o.overview_id, o.brand_id, o.created_at, o.ai_seo_score,
@@ -126,14 +137,20 @@ class Database:
             results = self.cursor.fetchall()
             
             overview_data = []
-            for result in results:
-                overview_data.append({
-                    "overview_id": str(result[0]),
-                    "brand_id": str(result[1]),
-                    "created_at": result[2].isoformat() if result[2] else None,
-                    "ai_seo_score": result[3],
-                    "brand_name": result[4]
-                })
+            score_change_percent = 0
+            if len(results) > 1:
+                score_change_percent = round(((results[0][3] - results[1][3]) / results[1][3]) * 100, 1)
+            else:
+                score_change_percent = -101
+                
+            overview_data.append({
+                "overview_id": str(results[0][0]),
+                "brand_id": str(results[0][1]),
+                "created_at": results[0][2].isoformat() if results[0][2] else None,
+                "ai_seo_score": results[0][3],
+                "brand_name": results[0][4],
+                "score_change_percent": score_change_percent,
+            })
             
             return overview_data
             
@@ -157,7 +174,11 @@ class Database:
             raise e
 
 if __name__ == "__main__":
+    # For development: Full reset + initialize + test data
+    print("🔄 Full development setup...")
     with Database() as db:
         db.reset_database()
         db.initialize_database()
+        db.insert_test_users()
+    print("✅ Development database ready!")
         
