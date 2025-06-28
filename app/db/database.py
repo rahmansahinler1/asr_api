@@ -127,7 +127,7 @@ class Database:
         try:
             query = """
                 SELECT o.overview_id, o.brand_id, o.created_at, o.ai_seo_score,
-                       b.brand_name
+                       b.brand_name, o.crawlability_score
                 FROM overview_data o
                 JOIN brand_info b ON o.brand_id = b.brand_id
                 WHERE o.user_id = %s
@@ -137,11 +137,20 @@ class Database:
             results = self.cursor.fetchall()
             
             overview_data = []
-            score_change_percent = 0
+            aiseo_score_change_percent = 0
+            crawlability_score_change_amount = 0
+            
             if len(results) > 1:
-                score_change_percent = round(((results[0][3] - results[1][3]) / results[1][3]) * 100, 1)
+                # AI SEO score change calculation
+                aiseo_score_change_percent = round(((results[0][3] - results[1][3]) / results[1][3]) * 100, 1)
+                
+                # Crawlability well performing pages change calculation
+                current_well = results[0][5][0]  # First element of crawlability array
+                previous_well = results[1][5][0]
+                crawlability_score_change_amount = current_well - previous_well
             else:
-                score_change_percent = -101
+                aiseo_score_change_percent = -101
+                crawlability_score_change_amount = -101
                 
             overview_data.append({
                 "overview_id": str(results[0][0]),
@@ -149,7 +158,9 @@ class Database:
                 "created_at": results[0][2].isoformat() if results[0][2] else None,
                 "ai_seo_score": results[0][3],
                 "brand_name": results[0][4],
-                "score_change_percent": score_change_percent,
+                "crawlability_score": results[0][5],
+                "aiseo_score_change_percent": aiseo_score_change_percent,
+                "crawlability_score_change_amount": crawlability_score_change_amount,
             })
             
             return overview_data
