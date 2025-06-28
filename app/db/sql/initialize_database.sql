@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS overview_data (
     brand_id UUID NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ai_seo_score INTEGER CHECK (ai_seo_score >= 0 AND ai_seo_score <= 100),
+    crawlability_score INTEGER[] CHECK (array_length(crawlability_score, 1) = 4),
     FOREIGN KEY (user_id) REFERENCES user_info(user_id),
     FOREIGN KEY (brand_id) REFERENCES brand_info(brand_id)
 );

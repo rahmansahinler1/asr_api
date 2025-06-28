@@ -21,20 +21,20 @@ INSERT INTO brand_info (brand_id, user_id, brand_name, domain, brand_niches) VAL
 
 -- Insert overview data for testing different scenarios
 -- User 1 (Sarah Newbie): Only 1 record -> triggers -101 "Not enough data collected"
-INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score) VALUES
-('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', NOW(), 55);
+INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score, crawlability_score) VALUES
+('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', NOW(), 55, ARRAY[120, 30, 15, 5]);
 
--- User 2 (John Increase): 2 records showing increase (60 -> 75) = +25%
-INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score) VALUES
-('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', NOW() - INTERVAL '1 week', 60),
-('20000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', NOW(), 75);
+-- User 2 (John Increase): AI SEO increase (60 -> 75) = +25%, Crawlability +10 well performing (140 -> 150)
+INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score, crawlability_score) VALUES
+('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', NOW() - INTERVAL '1 week', 60, ARRAY[140, 35, 18, 7]),
+('20000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', NOW(), 75, ARRAY[150, 30, 15, 5]);
 
--- User 3 (Mike Decline): 2 records showing decrease (80 -> 65) = -18.8%
-INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score) VALUES
-('20000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003', NOW() - INTERVAL '1 week', 80),
-('20000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003', NOW(), 65);
+-- User 3 (Mike Decline): AI SEO decrease (80 -> 65) = -18.8%, Crawlability -5 well performing (155 -> 150)
+INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score, crawlability_score) VALUES
+('20000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003', NOW() - INTERVAL '1 week', 80, ARRAY[155, 25, 15, 5]),
+('20000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003', NOW(), 65, ARRAY[150, 30, 15, 5]);
 
--- User 4 (Emma Stable): 2 records showing no change (70 -> 70) = 0%
-INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score) VALUES
-('20000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000004', NOW() - INTERVAL '1 week', 70),
-('20000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000004', NOW(), 70);
+-- User 4 (Emma Stable): AI SEO no change (70 -> 70) = 0%, Crawlability no change (150 -> 150)
+INSERT INTO overview_data (overview_id, user_id, brand_id, created_at, ai_seo_score, crawlability_score) VALUES
+('20000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000004', NOW() - INTERVAL '1 week', 70, ARRAY[150, 30, 15, 5]),
+('20000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000004', NOW(), 70, ARRAY[150, 30, 15, 5]);
