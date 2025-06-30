@@ -127,7 +127,7 @@ class Database:
         try:
             query = """
                 SELECT o.overview_id, o.brand_id, o.created_at, o.ai_seo_score,
-                       b.brand_name, o.crawlability_score
+                       b.brand_name, o.crawlability_score, o.total_reference_mention, o.total_link_mention
                 FROM overview_data o
                 JOIN brand_info b ON o.brand_id = b.brand_id
                 WHERE o.user_id = %s
@@ -139,6 +139,7 @@ class Database:
             overview_data = []
             aiseo_score_change_percent = 0
             crawlability_score_change_amount = 0
+            total_mention_change = 0
             
             if len(results) > 1:
                 # AI SEO score change calculation
@@ -148,9 +149,15 @@ class Database:
                 current_well = results[0][5][0]  # First element of crawlability array
                 previous_well = results[1][5][0]
                 crawlability_score_change_amount = current_well - previous_well
+                
+                # Total mentions change calculation
+                current_total_mentions = sum(results[0][6]) + sum(results[0][7])  # sum of reference + link arrays
+                previous_total_mentions = sum(results[1][6]) + sum(results[1][7])
+                total_mention_change = current_total_mentions - previous_total_mentions
             else:
                 aiseo_score_change_percent = -101
                 crawlability_score_change_amount = -101
+                total_mention_change = -101
                 
             overview_data.append({
                 "overview_id": str(results[0][0]),
@@ -159,8 +166,11 @@ class Database:
                 "ai_seo_score": results[0][3],
                 "brand_name": results[0][4],
                 "crawlability_score": results[0][5],
+                "total_reference_mention": results[0][6],
+                "total_link_mention": results[0][7],
                 "aiseo_score_change_percent": aiseo_score_change_percent,
                 "crawlability_score_change_amount": crawlability_score_change_amount,
+                "total_mention_change": total_mention_change,
             })
             
             return overview_data
